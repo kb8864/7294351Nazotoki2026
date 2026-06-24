@@ -23,7 +23,7 @@ export default function HintButtons({ hints }: { hints: string[] }) {
 
   return (
     <>
-      <div className="flex flex-col items-end gap-2">
+      <div className="flex flex-wrap justify-center gap-2">
         {hints.map((_, i) => (
           <motion.button
             key={i}
@@ -32,7 +32,7 @@ export default function HintButtons({ hints }: { hints: string[] }) {
               setCopied(false);
             }}
             whileTap={{ scale: 0.9 }}
-            className="rounded-full bg-amber-400 px-3 py-1.5 text-sm font-bold text-white shadow-md active:bg-amber-500"
+            className="rounded-full bg-amber-400 px-4 py-2 text-sm font-bold text-white shadow-md active:bg-amber-500"
           >
             ヒント{i + 1}
           </motion.button>

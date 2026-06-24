@@ -35,22 +35,24 @@ export default function PuzzleScreen({
       {/* 右上ハンバーガー */}
       <HamburgerMenu session={session} progress={progress} />
 
-      {/* ハンバーガーの下にヒントボタン群 */}
-      <div className="absolute right-3 top-16 z-20">
-        <HintButtons hints={puzzle.hints} />
-      </div>
-
-      {/* 問題画像（保存可能） */}
-      <div className="flex items-center justify-center p-3 pt-16 pr-20">
+      {/* 問題画像（全幅・大きめ・保存可能） */}
+      <div className="px-2 pt-14">
         <SaveableImage
           src={puzzle.image}
           alt={`${puzzle.label}の問題`}
-          className="max-h-[55vh]"
+          imgClassName="max-h-[56vh]"
         />
       </div>
 
-      {/* 回答エリア */}
-      <div className="mt-auto flex flex-col gap-2 px-5 pb-8">
+      {/* ヒントボタン（画像の下に横並び） */}
+      {puzzle.hints.length > 0 && (
+        <div className="mt-3 px-4">
+          <HintButtons hints={puzzle.hints} />
+        </div>
+      )}
+
+      {/* 回答エリア（ヒントの直後に詰める） */}
+      <div className="mt-4 flex flex-col gap-2 px-5 pb-8">
         <div className="flex items-baseline gap-3">
           <span className="rounded-md bg-[var(--color-ink)]/10 px-3 py-1 text-sm font-bold">
             回答入力欄

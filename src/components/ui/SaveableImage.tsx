@@ -8,11 +8,13 @@ export default function SaveableImage({
   src,
   alt,
   className = "",
+  imgClassName = "",
   hint = true,
 }: {
   src: string;
   alt: string;
   className?: string;
+  imgClassName?: string;
   hint?: boolean;
 }) {
   return (
@@ -22,7 +24,7 @@ export default function SaveableImage({
         src={src}
         alt={alt}
         draggable={false}
-        className="max-h-full max-w-full rounded-xl object-contain shadow select-none"
+        className={`w-full max-w-full rounded-xl object-contain shadow select-none ${imgClassName}`}
       />
       {hint && (
         <figcaption className="mt-1 text-[11px] text-[var(--color-ink)]/45">

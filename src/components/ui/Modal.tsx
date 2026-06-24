@@ -1,10 +1,16 @@
 "use client";
 
 import { AnimatePresence, motion } from "framer-motion";
-import { ReactNode } from "react";
+import { ReactNode, useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import PrimaryButton from "./PrimaryButton";
 
-/** 共通ポップアップ。閉じるボタン付き。リッチに出入りする。 */
+/**
+ * 共通ポップアップ。閉じるボタン付き。
+ * document.body へポータル描画＋ fixed 配置にすることで、
+ * 入れ子の位置指定や親要素の transform（Framer Motion）に影響されず、
+ * 常に画面中央に正しく表示される。
+ */
 export default function Modal({
   open,
   title,
@@ -18,11 +24,14 @@ export default function Modal({
   onClose: () => void;
   closeLabel?: string;
 }) {
-  return (
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+
+  const node = (
     <AnimatePresence>
       {open && (
         <motion.div
-          className="absolute inset-0 z-50 flex items-center justify-center p-5"
+          className="fixed inset-0 z-[100] flex items-center justify-center p-5"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
@@ -33,7 +42,7 @@ export default function Modal({
             aria-hidden
           />
           <motion.div
-            className="relative z-10 flex max-h-[80dvh] w-full max-w-sm flex-col overflow-hidden rounded-2xl bg-washi shadow-2xl"
+            className="relative z-10 flex max-h-[85dvh] w-full max-w-sm flex-col overflow-hidden rounded-2xl bg-washi shadow-2xl"
             initial={{ scale: 0.85, y: 30, opacity: 0 }}
             animate={{ scale: 1, y: 0, opacity: 1 }}
             exit={{ scale: 0.9, y: 20, opacity: 0 }}
@@ -55,4 +64,7 @@ export default function Modal({
       )}
     </AnimatePresence>
   );
+
+  if (!mounted) return null;
+  return createPortal(node, document.body);
 }
