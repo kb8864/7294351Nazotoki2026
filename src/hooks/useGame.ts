@@ -97,10 +97,14 @@ export function useGame(): GameApi {
     setScreen("notice");
   }, []);
 
+  // おまけ謎は注意事項画面を挟まず、直接おまけ謎01の問題へ進む
   const startBonus = useCallback(() => {
-    setNoticeNext("bonus");
-    setScreen("notice");
-  }, []);
+    if (!progress) return;
+    const order = Math.min(progress.bonusSolved + 1, BONUS_COUNT);
+    const meta = bonusByOrder(order);
+    if (meta) setCurrentPuzzleId(meta.id);
+    setScreen("puzzle");
+  }, [progress]);
 
   const proceedFromNotice = useCallback(() => {
     if (!progress) return;

@@ -56,6 +56,7 @@ export default function GameApp() {
           progress={progress}
           submitting={game.submitting}
           onSubmit={game.submit}
+          onBackToTop={game.backToTop}
         />
       ) : null;
       break;

@@ -14,14 +14,23 @@ type ActiveModal = null | "answered" | "winners" | "notice";
 export default function HamburgerMenu({
   session,
   progress,
+  onBackToTop,
 }: {
   session: LiffSession | null;
   progress: PlayerProgress | null;
+  onBackToTop: () => void;
 }) {
   const [open, setOpen] = useState(false);
   const [modal, setModal] = useState<ActiveModal>(null);
 
   const items: { label: string; onClick: () => void }[] = [
+    {
+      label: "トップに戻る",
+      onClick: () => {
+        setOpen(false);
+        onBackToTop();
+      },
+    },
     { label: "回答した問題と答えを確認する", onClick: () => openModal("answered") },
     { label: "全問正解者を見る", onClick: () => openModal("winners") },
     { label: "注意事項をみる", onClick: () => openModal("notice") },
