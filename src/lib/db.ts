@@ -23,8 +23,20 @@ interface Store {
 
 const TTL_SECONDS = 60 * 60 * 24 * 400; // 約400日（最低1年保持）
 
-function makeRedisStore(): Store {
-  const redis = Redis.fromEnv();
+/**
+ * Upstash の REST 認証情報を環境変数から取得する。
+ * 連携方法による変数名のゆれ（UPSTASH_REDIS_REST_* / KV_REST_API_*）の両方に対応。
+ */
+function redisCreds(): { url: string; token: string } | null {
+  const url =
+    process.env.UPSTASH_REDIS_REST_URL || process.env.KV_REST_API_URL || "";
+  const token =
+    process.env.UPSTASH_REDIS_REST_TOKEN || process.env.KV_REST_API_TOKEN || "";
+  return url && token ? { url, token } : null;
+}
+
+function makeRedisStore(creds: { url: string; token: string }): Store {
+  const redis = new Redis(creds);
   return {
     async get<T>(key: string) {
       return (await redis.get<T>(key)) ?? null;
@@ -76,9 +88,8 @@ function makeMemoryStore(): Store {
 let _store: Store | null = null;
 function store(): Store {
   if (!_store) {
-    const hasRedis =
-      process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN;
-    _store = hasRedis ? makeRedisStore() : makeMemoryStore();
+    const creds = redisCreds();
+    _store = creds ? makeRedisStore(creds) : makeMemoryStore();
   }
   return _store;
 }
