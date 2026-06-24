@@ -1,0 +1,104 @@
+"use client";
+
+import { useState } from "react";
+import { AnimatePresence } from "framer-motion";
+import { useGame } from "@/hooks/useGame";
+import LoadingScreen from "@/components/screens/LoadingScreen";
+import HomeScreen from "@/components/screens/HomeScreen";
+import TopScreen from "@/components/screens/TopScreen";
+import NoticeScreen from "@/components/screens/NoticeScreen";
+import PuzzleScreen from "@/components/screens/PuzzleScreen";
+import IncorrectScreen from "@/components/screens/IncorrectScreen";
+import MainClearScreen from "@/components/screens/MainClearScreen";
+import FinalClearScreen from "@/components/screens/FinalClearScreen";
+import BonusUnlockModal from "@/components/screens/BonusUnlockModal";
+
+export default function GameApp() {
+  const game = useGame();
+  const [bonusModalOpen, setBonusModalOpen] = useState(false);
+
+  const { screen, session, progress, currentPuzzle } = game;
+
+  let content: React.ReactNode = null;
+
+  switch (screen) {
+    case "loading":
+      content = (
+        <LoadingScreen error={game.error} mock={session?.mock} />
+      );
+      break;
+
+    case "home":
+      content = <HomeScreen key="home" onTap={game.tapHome} />;
+      break;
+
+    case "top":
+      content = (
+        <TopScreen
+          key="top"
+          bonusUnlocked={Boolean(progress?.mainCleared)}
+          onStartMain={game.startMain}
+          onTapBonus={() => setBonusModalOpen(true)}
+        />
+      );
+      break;
+
+    case "notice":
+      content = <NoticeScreen key="notice" onNext={game.proceedFromNotice} />;
+      break;
+
+    case "puzzle":
+      content = currentPuzzle ? (
+        <PuzzleScreen
+          key={`puzzle-${currentPuzzle.id}`}
+          puzzle={currentPuzzle}
+          session={session}
+          progress={progress}
+          submitting={game.submitting}
+          onSubmit={game.submit}
+        />
+      ) : null;
+      break;
+
+    case "incorrect":
+      content = (
+        <IncorrectScreen key="incorrect" onClose={game.closeIncorrect} />
+      );
+      break;
+
+    case "mainClear":
+      content = (
+        <MainClearScreen key="mainClear" onNext={game.afterMainClear} />
+      );
+      break;
+
+    case "finalClear":
+      content = (
+        <FinalClearScreen
+          key="finalClear"
+          defaultName={
+            progress?.registeredName || session?.profile?.displayName || ""
+          }
+          alreadyName={progress?.registeredName}
+          onRegister={game.register}
+          onBackToTop={game.backToTop}
+        />
+      );
+      break;
+  }
+
+  return (
+    <div className="app-frame">
+      <AnimatePresence mode="wait">{content}</AnimatePresence>
+
+      {/* おまけ謎の解放メッセージ → 注意事項へ */}
+      <BonusUnlockModal
+        open={bonusModalOpen}
+        onProceed={() => {
+          setBonusModalOpen(false);
+          game.startBonus();
+        }}
+      />
+    </div>
+  );
+}
