@@ -42,13 +42,21 @@ export async function initLiff(): Promise<LiffSession> {
 
   try {
     if (!initPromise) {
-      initPromise = liff.init({ liffId });
+      // 外部ブラウザでは init 時に自動ログイン。LINEアプリ内(in-client)では常にログイン済み。
+      initPromise = liff.init({ liffId, withLoginOnExternalBrowser: true });
     }
     await initPromise;
 
     if (!liff.isLoggedIn()) {
-      // ログイン画面へリダイレクト（戻ってきたら再度ここを通る）
-      liff.login({ redirectUri: window.location.href });
+      // in-client では通常ここに来ない。来た場合でも無限ループを避けるため、
+      // 1セッションにつき1回だけ login() を試みる。
+      const tried =
+        typeof window !== "undefined" &&
+        window.sessionStorage.getItem("liff_login_tried");
+      if (!liff.isInClient() && !tried) {
+        window.sessionStorage.setItem("liff_login_tried", "1");
+        liff.login({ redirectUri: window.location.href });
+      }
       return {
         ready: false,
         loggedIn: false,
@@ -56,8 +64,15 @@ export async function initLiff(): Promise<LiffSession> {
         profile: null,
         idToken: null,
         mock: false,
-        error: null,
+        error: liff.isInClient()
+          ? "LINEログイン情報を取得できませんでした。アプリを開き直してください。"
+          : null,
       };
+    }
+
+    // ログイン成功 → ループ防止フラグをクリア
+    if (typeof window !== "undefined") {
+      window.sessionStorage.removeItem("liff_login_tried");
     }
 
     const p = await liff.getProfile();
