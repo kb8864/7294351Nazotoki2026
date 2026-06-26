@@ -17,6 +17,7 @@ export default function PuzzleScreen({
   submitting,
   onSubmit,
   onBackToTop,
+  onChallenge,
 }: {
   puzzle: PuzzleMeta;
   session: LiffSession | null;
@@ -24,6 +25,7 @@ export default function PuzzleScreen({
   submitting: boolean;
   onSubmit: (answer: string) => void;
   onBackToTop: () => void;
+  onChallenge: (puzzleId: number) => void;
 }) {
   const [value, setValue] = useState("");
   const canSubmit = value.trim().length > 0 && !submitting;
@@ -40,6 +42,7 @@ export default function PuzzleScreen({
         session={session}
         progress={progress}
         onBackToTop={onBackToTop}
+        onChallenge={onChallenge}
       />
 
       {/* 問題画像（全幅・大きめ・保存可能） */}

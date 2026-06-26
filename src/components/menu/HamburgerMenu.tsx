@@ -15,10 +15,12 @@ export default function HamburgerMenu({
   session,
   progress,
   onBackToTop,
+  onChallenge,
 }: {
   session: LiffSession | null;
   progress: PlayerProgress | null;
   onBackToTop: () => void;
+  onChallenge: (puzzleId: number) => void;
 }) {
   const [open, setOpen] = useState(false);
   const [modal, setModal] = useState<ActiveModal>(null);
@@ -97,6 +99,10 @@ export default function HamburgerMenu({
         open={modal === "answered"}
         progress={progress}
         onClose={() => setModal(null)}
+        onChallenge={(id) => {
+          setModal(null);
+          onChallenge(id);
+        }}
       />
       <WinnersModal
         open={modal === "winners"}

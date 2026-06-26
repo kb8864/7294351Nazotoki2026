@@ -27,7 +27,8 @@ export type Screen =
   | "puzzle"
   | "incorrect"
   | "mainClear"
-  | "finalClear";
+  | "finalClear"
+  | "practice";
 
 export type NoticeNext = "main" | "bonus";
 
@@ -36,6 +37,8 @@ export interface GameApi {
   progress: PlayerProgress | null;
   screen: Screen;
   currentPuzzle: PuzzleMeta | null;
+  /** 復習モードで挑戦中の問題（screen === "practice" のとき） */
+  practicePuzzle: PuzzleMeta | null;
   submitting: boolean;
   /** 正解演出（「正解！」＋紙吹雪）の表示中フラグ */
   celebrating: boolean;
@@ -50,6 +53,10 @@ export interface GameApi {
   afterMainClear: () => void;
   register: (name: string) => Promise<void>;
   backToTop: () => void;
+  /** 既出の問題を復習モードで開く */
+  startPractice: (puzzleId: number) => void;
+  /** 復習モードを終了して、進行中の問題へ戻る */
+  exitPractice: () => void;
   reload: () => Promise<void>;
 }
 
@@ -58,6 +65,7 @@ export function useGame(): GameApi {
   const [progress, setProgress] = useState<PlayerProgress | null>(null);
   const [screen, setScreen] = useState<Screen>("loading");
   const [currentPuzzleId, setCurrentPuzzleId] = useState<number>(1);
+  const [practiceId, setPracticeId] = useState<number | null>(null);
   const [noticeNext, setNoticeNext] = useState<NoticeNext>("main");
   const [submitting, setSubmitting] = useState(false);
   const [celebrating, setCelebrating] = useState(false);
@@ -182,6 +190,16 @@ export function useGame(): GameApi {
   const afterMainClear = useCallback(() => setScreen("top"), []);
   const backToTop = useCallback(() => setScreen("top"), []);
 
+  // 復習モード：既出の問題をもう一度開く（進捗には影響しない）
+  const startPractice = useCallback((puzzleId: number) => {
+    setPracticeId(puzzleId);
+    setScreen("practice");
+  }, []);
+  const exitPractice = useCallback(() => {
+    setPracticeId(null);
+    setScreen("puzzle"); // 進行中の問題へ戻る
+  }, []);
+
   const register = useCallback(
     async (name: string) => {
       if (!session) return;
@@ -196,6 +214,7 @@ export function useGame(): GameApi {
     progress,
     screen,
     currentPuzzle: getPuzzleMeta(currentPuzzleId) ?? null,
+    practicePuzzle: practiceId != null ? getPuzzleMeta(practiceId) ?? null : null,
     submitting,
     celebrating,
     error,
@@ -208,6 +227,8 @@ export function useGame(): GameApi {
     afterMainClear,
     register,
     backToTop,
+    startPractice,
+    exitPractice,
     reload,
   };
 }

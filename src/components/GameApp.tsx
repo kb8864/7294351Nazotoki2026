@@ -11,6 +11,7 @@ import PuzzleScreen from "@/components/screens/PuzzleScreen";
 import IncorrectScreen from "@/components/screens/IncorrectScreen";
 import MainClearScreen from "@/components/screens/MainClearScreen";
 import FinalClearScreen from "@/components/screens/FinalClearScreen";
+import PracticeScreen from "@/components/screens/PracticeScreen";
 import BonusUnlockModal from "@/components/screens/BonusUnlockModal";
 import CorrectOverlay from "@/components/ui/CorrectOverlay";
 
@@ -58,6 +59,7 @@ export default function GameApp() {
           submitting={game.submitting}
           onSubmit={game.submit}
           onBackToTop={game.backToTop}
+          onChallenge={game.startPractice}
         />
       ) : null;
       break;
@@ -72,6 +74,17 @@ export default function GameApp() {
       content = (
         <MainClearScreen key="mainClear" onNext={game.afterMainClear} />
       );
+      break;
+
+    case "practice":
+      content = game.practicePuzzle ? (
+        <PracticeScreen
+          key={`practice-${game.practicePuzzle.id}`}
+          puzzle={game.practicePuzzle}
+          session={session}
+          onExit={game.exitPractice}
+        />
+      ) : null;
       break;
 
     case "finalClear":
