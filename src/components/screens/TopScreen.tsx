@@ -22,8 +22,8 @@ export default function TopScreen({
 
   return (
     <div
-      className="relative min-h-dvh w-full overflow-hidden bg-cover bg-center bg-no-repeat"
-      style={{ backgroundImage: `url(${bg})` }}
+      className="relative min-h-dvh w-full overflow-hidden bg-washi bg-cover bg-center bg-no-repeat"
+      style={{ backgroundImage: `url(${bg})`, backgroundColor: "var(--color-washi)" }}
     >
       {/* アスペクト比維持のスペーサー（縦長画像 約9:16） */}
       <div className="pointer-events-none w-full" style={{ paddingTop: "177%" }} />

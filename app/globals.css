@@ -18,7 +18,7 @@ body {
 body {
   font-family: var(--font-rounded);
   color: var(--color-ink);
-  background: #111;
+  background: var(--color-washi);
   overscroll-behavior: none;
 }
 
@@ -30,4 +30,6 @@ body {
   min-height: 100dvh;
   position: relative;
   overflow: hidden;
+  /* 画面遷移や画像読み込み中に黒が透けないよう、下地を和紙色にする */
+  background: var(--color-washi);
 }

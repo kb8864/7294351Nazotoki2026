@@ -21,6 +21,11 @@ export default function RootLayout({
 }) {
   return (
     <html lang="ja">
+      <head>
+        {/* トップ背景は最初に表示されるため先読みして黒/空白の瞬間を減らす */}
+        <link rel="preload" as="image" href="/images/top-bg.png" />
+        <link rel="preload" as="image" href="/images/home.png" />
+      </head>
       <body>{children}</body>
     </html>
   );
