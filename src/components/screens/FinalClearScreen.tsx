@@ -1,9 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import SaveableImage from "@/components/ui/SaveableImage";
 import PrimaryButton from "@/components/ui/PrimaryButton";
+import { celebrate } from "@/lib/confetti";
+import { popIn } from "@/lib/motion";
 
 /**
  * 最終クリア（謎解き完了）。画像（保存可能）＋名前入力。
@@ -25,6 +27,10 @@ export default function FinalClearScreen({
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  useEffect(() => {
+    celebrate("clear");
+  }, []);
+
   const handleSubmit = async () => {
     if (!name.trim() || submitting) return;
     setSubmitting(true);
@@ -42,13 +48,17 @@ export default function FinalClearScreen({
   return (
     <motion.div
       className="flex min-h-dvh w-full flex-col bg-washi px-5 pb-10 pt-5"
-      initial={{ opacity: 0, scale: 0.96 }}
-      animate={{ opacity: 1, scale: 1 }}
-      transition={{ type: "spring", stiffness: 200, damping: 20 }}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
     >
-      <div className="flex flex-1 items-center justify-center">
+      <motion.div
+        className="flex flex-1 items-center justify-center"
+        variants={popIn}
+        initial="initial"
+        animate="animate"
+      >
         <SaveableImage src="/images/main-complete.jpg" alt="謎解き完了" />
-      </div>
+      </motion.div>
 
       {submitted ? (
         <div className="mt-4 flex flex-col items-center gap-4">

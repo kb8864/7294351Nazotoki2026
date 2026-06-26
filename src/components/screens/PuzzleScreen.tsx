@@ -8,6 +8,7 @@ import HamburgerMenu from "@/components/menu/HamburgerMenu";
 import HintButtons from "@/components/ui/HintButtons";
 import SaveableImage from "@/components/ui/SaveableImage";
 import PrimaryButton from "@/components/ui/PrimaryButton";
+import { staggerContainer, staggerItem } from "@/lib/motion";
 
 export default function PuzzleScreen({
   puzzle,
@@ -30,9 +31,9 @@ export default function PuzzleScreen({
   return (
     <motion.div
       className="relative flex min-h-dvh w-full flex-col bg-washi"
-      initial={{ opacity: 0, x: 24 }}
-      animate={{ opacity: 1, x: 0 }}
-      transition={{ type: "spring", stiffness: 260, damping: 28 }}
+      variants={staggerContainer}
+      initial="initial"
+      animate="animate"
     >
       {/* 右上ハンバーガー */}
       <HamburgerMenu
@@ -42,23 +43,26 @@ export default function PuzzleScreen({
       />
 
       {/* 問題画像（全幅・大きめ・保存可能） */}
-      <div className="px-2 pt-14">
+      <motion.div className="px-2 pt-14" variants={staggerItem}>
         <SaveableImage
           src={puzzle.image}
           alt={`${puzzle.label}の問題`}
           imgClassName="max-h-[56vh]"
         />
-      </div>
+      </motion.div>
 
       {/* ヒントボタン（画像の下に横並び） */}
       {puzzle.hints.length > 0 && (
-        <div className="mt-3 px-4">
+        <motion.div className="mt-3 px-4" variants={staggerItem}>
           <HintButtons hints={puzzle.hints} />
-        </div>
+        </motion.div>
       )}
 
       {/* 回答エリア（ヒントの直後に詰める） */}
-      <div className="mt-4 flex flex-col gap-2 px-5 pb-8">
+      <motion.div
+        className="mt-4 flex flex-col gap-2 px-5 pb-8"
+        variants={staggerItem}
+      >
         <div>
           <span className="rounded-md bg-[var(--color-ink)]/10 px-3 py-1 text-sm font-bold">
             回答入力欄
@@ -91,7 +95,7 @@ export default function PuzzleScreen({
             {submitting ? "…" : "回答送信"}
           </PrimaryButton>
         </div>
-      </div>
+      </motion.div>
     </motion.div>
   );
 }

@@ -15,6 +15,9 @@ import {
   MAIN_COUNT,
   BONUS_COUNT,
 } from "@/lib/puzzles";
+import { celebrate } from "@/lib/confetti";
+
+const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
 export type Screen =
   | "loading"
@@ -34,6 +37,8 @@ export interface GameApi {
   screen: Screen;
   currentPuzzle: PuzzleMeta | null;
   submitting: boolean;
+  /** 正解演出（「正解！」＋紙吹雪）の表示中フラグ */
+  celebrating: boolean;
   error: string | null;
   // 遷移
   tapHome: () => void;
@@ -55,6 +60,7 @@ export function useGame(): GameApi {
   const [currentPuzzleId, setCurrentPuzzleId] = useState<number>(1);
   const [noticeNext, setNoticeNext] = useState<NoticeNext>("main");
   const [submitting, setSubmitting] = useState(false);
+  const [celebrating, setCelebrating] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   // 初期化：LIFF → 進捗取得
@@ -138,7 +144,14 @@ export function useGame(): GameApi {
           setScreen("incorrect");
           return;
         }
-        // 正解 → 次の遷移を決定
+
+        // 正解 → 「正解！」演出＋紙吹雪を見せてから次へ進む
+        celebrate("correct");
+        setCelebrating(true);
+        await sleep(1100);
+        setCelebrating(false);
+
+        // 次の遷移を決定
         if (meta.group === "main") {
           if (next.mainCleared) {
             setScreen("mainClear");
@@ -184,6 +197,7 @@ export function useGame(): GameApi {
     screen,
     currentPuzzle: getPuzzleMeta(currentPuzzleId) ?? null,
     submitting,
+    celebrating,
     error,
     tapHome,
     startMain,

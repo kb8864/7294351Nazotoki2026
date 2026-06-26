@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { AnimatePresence } from "framer-motion";
+import { AnimatePresence, MotionConfig } from "framer-motion";
 import { useGame } from "@/hooks/useGame";
 import LoadingScreen from "@/components/screens/LoadingScreen";
 import HomeScreen from "@/components/screens/HomeScreen";
@@ -12,6 +12,7 @@ import IncorrectScreen from "@/components/screens/IncorrectScreen";
 import MainClearScreen from "@/components/screens/MainClearScreen";
 import FinalClearScreen from "@/components/screens/FinalClearScreen";
 import BonusUnlockModal from "@/components/screens/BonusUnlockModal";
+import CorrectOverlay from "@/components/ui/CorrectOverlay";
 
 export default function GameApp() {
   const game = useGame();
@@ -89,17 +90,22 @@ export default function GameApp() {
   }
 
   return (
-    <div className="app-frame">
-      <AnimatePresence mode="wait">{content}</AnimatePresence>
+    <MotionConfig reducedMotion="user">
+      <div className="app-frame">
+        <AnimatePresence mode="wait">{content}</AnimatePresence>
 
-      {/* おまけ謎の解放メッセージ → 注意事項へ */}
-      <BonusUnlockModal
-        open={bonusModalOpen}
-        onProceed={() => {
-          setBonusModalOpen(false);
-          game.startBonus();
-        }}
-      />
-    </div>
+        {/* 正解時の全画面演出 */}
+        <CorrectOverlay open={game.celebrating} />
+
+        {/* おまけ謎の解放メッセージ → おまけ謎へ */}
+        <BonusUnlockModal
+          open={bonusModalOpen}
+          onProceed={() => {
+            setBonusModalOpen(false);
+            game.startBonus();
+          }}
+        />
+      </div>
+    </MotionConfig>
   );
 }
