@@ -96,6 +96,28 @@ function store(): Store {
 
 // ------------------------------------------------------------
 
+/**
+ * 保存先が永続(Redis)か一時(memory)かを診断する。
+ * 実際に書き込み→読み出しを行い、接続が生きているかも確認する。
+ * 秘密情報は返さない。
+ */
+export async function storageStatus(): Promise<{
+  mode: "redis" | "memory";
+  ok: boolean;
+  persistent: boolean;
+}> {
+  const mode = redisCreds() ? "redis" : "memory";
+  try {
+    const key = "__health_check__";
+    await store().set(key, { at: Date.now() });
+    const v = await store().get<{ at: number }>(key);
+    const ok = Boolean(v && typeof v.at === "number");
+    return { mode, ok, persistent: mode === "redis" && ok };
+  } catch {
+    return { mode, ok: false, persistent: false };
+  }
+}
+
 const playerKey = (userId: string) => `player:${userId}`;
 
 function emptyProgress(displayName: string): PlayerProgress {
