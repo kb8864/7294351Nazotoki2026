@@ -240,6 +240,19 @@ export async function registerWinner(
   await store().hset(WINNERS_HASH, winnerKey(userId), entry);
 }
 
+/**
+ * 過去（消失した）全問正解者を手動で取り込む。
+ * 決定的キー（legacy:<clearedAt>:<name>）で重複なく upsert。実ユーザー(LINE sub)とは衝突しない。
+ */
+export async function importWinner(
+  name: string,
+  clearedAt: number
+): Promise<void> {
+  const field = `legacy:${clearedAt}:${name}`;
+  const entry: WinnerEntry = { name, clearedAt };
+  await store().hset(WINNERS_HASH, field, entry);
+}
+
 /** 全問正解者の一覧（クリアした順） */
 export async function listWinners(): Promise<WinnerEntry[]> {
   const all = await store().hgetall<WinnerEntry>(WINNERS_HASH);

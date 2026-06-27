@@ -94,6 +94,24 @@ npm run dev                        # http://localhost:3000
 | `bonus-02.jpg`（おまけ謎０２）| おまけ謎2（並べ替え、ヒント無し、答え `10七天発揮`）|
 | `main-complete.jpg`（謎解き完了）| 最終クリア（名前入力）|
 
+## 過去の全問正解者の取り込み（管理用）
+
+消えてしまった過去の正解者を、`winners` に手動で取り込めます（現在の一覧に時刻順で混ざり、
+過去＝時刻が前なので自然に上に並びます）。Vercel に `ADMIN_KEY` を設定してから:
+
+```bash
+curl -X POST "https://<本番URL>/api/admin/import-winners?key=<ADMIN_KEY>" \
+  -H "Content-Type: application/json" \
+  -d '{"winners":[
+        {"name":"七福太郎","time":"2026-06-25T21:15:00+09:00"},
+        {"name":"七福花子","clearedAt":1750000000000}
+      ]}'
+```
+
+- `time` は日本時間なら `+09:00` を付ける。`clearedAt`（epoch ms）でも可。
+- 同じ `name`＋時刻は重複せず上書き（再実行しても増えない）。
+- 取り込み結果と件数は `GET /api/admin/stats?key=<ADMIN_KEY>` で確認可能。
+
 ## ビルド
 
 ```bash
