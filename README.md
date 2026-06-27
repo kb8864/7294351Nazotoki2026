@@ -1,7 +1,7 @@
 # 七福の謎解きアプリ（LINEミニアプリ / LIFF）
 
 七福脱出部「2026合宿謎」の謎解きアプリ。LINEログインしてユーザーごとに進捗をDB保存します。
-**Next.js (App Router) + React + TypeScript + Tailwind CSS v4 + Framer Motion + LIFF + Upstash Redis**
+**Next.js (App Router) + React + TypeScript + Tailwind CSS v4 + Framer Motion + LIFF + Redis**
 
 ## 画面フロー
 
@@ -29,20 +29,23 @@
   判定は「全空白（半角/全角）を除去して一致」。指定の表記ゆれ（番号＋ひらがな/漢字、半角/全角）を網羅。
 - **認証**：クライアントが `liff.getIDToken()` を `Authorization: Bearer` で送信 →
   サーバーが LINE の verify エンドポイントで検証して userId を特定（`src/lib/auth.ts`）。
-- **DB**：Upstash Redis（`src/lib/db.ts`）。TTL 約400日でアクセス毎に延長（最低1年保持）。
-  環境変数が無い場合はメモリ内ストアにフォールバック（開発用・非永続）。
+- **DB**：Redis（`src/lib/db.ts`、node-redis、`REDIS_URL` で接続）。全問正解者は Hash で
+  恒久保存、各自の進捗は TTL 約400日。`REDIS_URL` が無い場合はメモリ内ストアにフォールバック
+  （開発用・非永続）。保存先の状態は `GET /api/health` で確認可能。
 - **API**（`app/api/*`）
   - `GET  /api/progress` … 自分の進捗
   - `POST /api/answer` … 回答判定＋進捗更新（正解のみ保存）
   - `POST /api/register` … 最終クリア者として名前を登録
   - `GET  /api/winners` … 全問正解者一覧（名前＋クリア日時、クリア順）
+  - `GET  /api/health` … 保存先の診断（`persistent: true` なら恒久保存）
+  - `GET  /api/admin/stats?key=<ADMIN_KEY>` … 管理用集計（正解者数・登録者数・一覧）
 
 ## ディレクトリ
 
 ```
 app/
   layout.tsx, globals.css, page.tsx
-  api/{progress,answer,register,winners}/route.ts
+  api/{progress,answer,register,winners,health,admin/stats}/route.ts
 src/
   lib/      liff.ts, api.ts(クライアント), auth.ts, db.ts,
             answers.server.ts(正解:サーバー専用), puzzles.ts(問題メタ/ヒント), types.ts
@@ -58,7 +61,7 @@ src/
 
 ```bash
 npm install
-cp .env.local.example .env.local   # LIFF ID / LINE_CHANNEL_ID / Upstash を設定
+cp .env.local.example .env.local   # LIFF ID / LINE_CHANNEL_ID / REDIS_URL を設定
 npm run dev                        # http://localhost:3000
 ```
 
@@ -67,8 +70,8 @@ npm run dev                        # http://localhost:3000
 ## デプロイ（Vercel）
 
 1. リポジトリを Vercel にインポート。
-2. Marketplace から **Upstash (Redis)** を追加 → `UPSTASH_REDIS_REST_URL` /
-   `UPSTASH_REDIS_REST_TOKEN` が自動で環境変数に入ります。
+2. Marketplace から **Redis** を追加し、対象プロジェクトに **Connect** → `REDIS_URL` が
+   自動で環境変数に入ります（全環境）。
 3. `NEXT_PUBLIC_LIFF_ID` と `LINE_CHANNEL_ID` を環境変数に設定。
 4. デプロイ後の公開URLを、LINE Developers の LIFF エンドポイントURLに設定。
 
